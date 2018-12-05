@@ -20,8 +20,10 @@ public class BookStoreService {
 
     public void persistObjectGraph(Book book) throws Exception{
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore", "root", "percy123");
+            // Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("org.h2.Driver");
+           // connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore", "root", "percy123");
+            connection = DriverManager.getConnection("jdbc:h2:file:./target/h2db/db/demoapp", "demoApp", "");
             System.out.println(connection.getClass());
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO PUBLISHER (CODE, PUBLISHER_NAME) VALUES (?, ?)");
             stmt.setString(1, book.getPublisher().getCode());
