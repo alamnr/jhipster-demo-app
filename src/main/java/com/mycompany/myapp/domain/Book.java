@@ -55,6 +55,13 @@ public class Book {
         this.title = title;
     }
 
+    public Publisher getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(Publisher publisher) {
+        this.publisher = publisher;
+    }
 
     @Override
     public String toString() {

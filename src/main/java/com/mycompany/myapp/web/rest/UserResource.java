@@ -210,4 +210,18 @@ public class UserResource {
             .stream(userSearchRepository.search(queryStringQuery(query)).spliterator(), false)
             .collect(Collectors.toList());
     }
+
+
+
+    @GetMapping("/users/{id}")
+    @Timed
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        log.debug("REST request to get User : {}", id);
+        UserDTO user = new UserDTO();
+        user.getAuthorities().add("aaaa");
+
+
+        Optional<UserDTO> userDTO = userService.getUserWithAuthoritiesByLogin("admin").map(UserDTO::new);
+        return ResponseUtil.wrapOrNotFound(userDTO);
+    }
 }
