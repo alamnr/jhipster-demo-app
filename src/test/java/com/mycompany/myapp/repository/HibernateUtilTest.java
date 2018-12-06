@@ -5,8 +5,13 @@ import com.mycompany.myapp.repository.util.HibernateUtil;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+import org.junit.After;
 import org.junit.Test;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 public class HibernateUtilTest {
@@ -248,12 +253,79 @@ public class HibernateUtilTest {
         // Test Cascade Remove
         try{
             transaction.begin();
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Student> query = builder.createQuery(Student.class);
+            Root<Student> root = query.from(Student.class);
+            query.select(root);
+            Query<Student> q = session.createQuery(query);
 
-            studentGetList = session.createQuery("from Student").list();
-            guideGetList = session.createQuery("from Guide").list();
+            studentGetList = q.getResultList();
+
+            CriteriaQuery<Guide> query_ = builder.createQuery(Guide.class);
+            Root<Guide> root_ = query_.from(Guide.class);
+            query_.select(root_);
+            Query<Guide> q_ = session.createQuery(query_);
+            guideGetList = q_.getResultList();
+
+            System.out.println(studentGetList);
+            System.out.println(guideGetList);
 
             Assertions.assertThat(studentGetList.size()).isEqualTo(2);
             Assertions.assertThat(guideGetList.size()).isEqualTo(2);
+
+            transaction.commit();
+
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+    }
+
+    @After
+    public void cleanUp(){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = session.getTransaction();
+
+
+        List<Student> studentGetList;
+        List<Guide> guideGetList;
+
+
+        // Test Cascade Remove
+        try{
+            transaction.begin();
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Student> query = builder.createQuery(Student.class);
+            Root<Student> root = query.from(Student.class);
+            query.select(root);
+            Query<Student> q = session.createQuery(query);
+
+            studentGetList = q.getResultList();
+
+            CriteriaQuery<Guide> query_ = builder.createQuery(Guide.class);
+            Root<Guide> root_ = query_.from(Guide.class);
+            query_.select(root_);
+            Query<Guide> q_ = session.createQuery(query_);
+            guideGetList = q_.getResultList();
+
+            System.out.println(studentGetList);
+            System.out.println(guideGetList);
+
+            for (Student student: studentGetList) {
+                session.delete(student);
+            }
+
+            for (Guide guide: guideGetList) {
+                session.delete(guide);
+            }
 
             transaction.commit();
 
