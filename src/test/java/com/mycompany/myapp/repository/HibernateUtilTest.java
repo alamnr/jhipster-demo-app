@@ -7,6 +7,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.Test;
 
+import java.util.List;
+
 public class HibernateUtilTest {
 
     @Test
@@ -171,5 +173,101 @@ public class HibernateUtilTest {
         }
 
 
+        session = HibernateUtil.getSessionFactory().openSession();
+        transaction = session.getTransaction();
+
+
+
+        try{
+            transaction.begin();
+
+            studentGet = session.get(Student.class,student.getId());
+
+
+
+            transaction.commit();
+
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+
+
+    }
+
+    @Test
+    public void  persistBidirectionalGuideStudent(){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = session.getTransaction();
+        Guide guide  =  new Guide("32424","Mike",4000);
+        Guide guide_2  =  new Guide("13124","Molden",2000);
+        Student student = new Student("123212","John Smith",guide);
+        Student student_2 = new Student("64757689","John Sina",guide_2);
+
+        guide.addStudent(student);
+        guide_2.addStudent(student_2);
+
+        List<Student> studentGetList;
+        List<Guide> guideGetList;
+
+
+        try{
+            transaction.begin();
+
+
+            // Test Cascade Persist Guide
+            session.persist(guide);
+            session.persist(guide_2);
+
+            transaction.commit();
+
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+
+        session = HibernateUtil.getSessionFactory().openSession();
+        transaction = session.getTransaction();
+
+        // Test Cascade Remove
+        try{
+            transaction.begin();
+
+            studentGetList = session.createQuery("from Student").list();
+            guideGetList = session.createQuery("from Guide").list();
+
+            Assertions.assertThat(studentGetList.size()).isEqualTo(2);
+            Assertions.assertThat(guideGetList.size()).isEqualTo(2);
+
+            transaction.commit();
+
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
     }
 }

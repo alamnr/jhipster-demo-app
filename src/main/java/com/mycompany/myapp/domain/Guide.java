@@ -1,10 +1,10 @@
 package com.mycompany.myapp.domain;
 
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 @Entity
 public class Guide {
@@ -19,12 +19,23 @@ public class Guide {
     private String name;
     private Integer salary;
 
+    @OneToMany(mappedBy = "guide", cascade = CascadeType.PERSIST)
+    private Set<Student> students = new HashSet<Student>() ;
+
     public Guide(){}
 
     public Guide(String staffId, String name, Integer salary) {
         this.staffId = staffId;
         this.name = name;
         this.salary = salary;
+    }
+
+    public void addStudent(Student student){
+        this.students.add(student);
+    }
+
+    public Iterator<Student> getStudentIterator(){
+        return this.students.iterator();
     }
 
     public Long getId() {
