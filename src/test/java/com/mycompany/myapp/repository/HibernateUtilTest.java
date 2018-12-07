@@ -425,6 +425,69 @@ public class HibernateUtilTest {
         Assertions.assertThat(customerList.size()).isEqualTo(1);
     }
 
+    @Test
+    public void testManyToMany(){
+        Session session  =  HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = session.getTransaction();
+
+        try{
+            transaction.begin();
+            Movie movie_1 = new Movie("Ganja");
+            Movie movie_2  = new Movie("Baba");
+
+            Actor actor_1 = new Actor("Jack");
+            Actor actor_2 = new Actor("Daniel");
+
+            movie_1.addActor(actor_1);
+
+            movie_2.addActor(actor_1);
+            movie_2.addActor(actor_2);
+
+            session.persist(movie_1);
+            session.persist(movie_2);
+
+            transaction.commit();
+
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+
+        session = HibernateUtil.getSessionFactory().openSession();
+        transaction  = session.getTransaction();
+        List<Movie> movieList;
+        List<Actor> actorList;
+        try{
+            transaction.begin();
+            movieList = session.createQuery("from Movie").list();
+            actorList = session.createQuery("from Actor").list();
+
+            transaction.commit();
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+        /*System.out.println(passportList);
+        System.out.println(customerList);*/
+        Assertions.assertThat(movieList.size()).isEqualTo(2);
+        Assertions.assertThat(actorList.size()).isEqualTo(2);
+    }
     @After
     public void cleanUp(){
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -458,6 +521,10 @@ public class HibernateUtilTest {
             passportList = session.createQuery("from Passport").list();
             customerList = session.createQuery("from Customer").list();
 
+            List<Movie> movieList = session.createQuery("from Movie").list();
+            List<Actor> actorList = session.createQuery("from Actor").list();
+
+
 /*            System.out.println(studentGetList);
             System.out.println(guideGetList);
 
@@ -479,6 +546,14 @@ public class HibernateUtilTest {
 
             for(Passport passport: passportList){
                 session.delete(passport);
+            }
+
+            for(Movie movie: movieList){
+                session.delete(movie);
+            }
+
+            for(Actor actor: actorList){
+                session.delete(actor);
             }
 
             transaction.commit();

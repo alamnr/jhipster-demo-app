@@ -5,9 +5,12 @@
 package com.mycompany.myapp.domain;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
+@Entity
 public class Movie {
 
     @Id
@@ -23,7 +26,7 @@ public class Movie {
         joinColumns = {@JoinColumn(name = "movie_id")},
         inverseJoinColumns = {@JoinColumn(name = "actor_id")}
     )
-    private Set<Actor> actors;
+    private Set<Actor> actors = new HashSet<>();
 
     public Movie() {
     }
@@ -62,17 +65,13 @@ public class Movie {
         if (o == null || getClass() != o.getClass()) return false;
 
         Movie movie = (Movie) o;
-
-        if (!id.equals(movie.id)) return false;
-        if (!name.equals(movie.name)) return false;
-        return actors != null ? actors.equals(movie.actors) : movie.actors == null;
+        return !(movie.getId() == null || getId() == null) && Objects.equals(getId(), movie.getId());
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + name.hashCode();
-        return result;
+
+        return Objects.hashCode(getId());
     }
 
     @Override

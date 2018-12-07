@@ -4,13 +4,12 @@
 
 package com.mycompany.myapp.domain;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
+@Entity
 public class Actor {
 
     @Id
@@ -19,7 +18,7 @@ public class Actor {
     @Column(nullable = false)
     private  String name;
 
-    @ManyToMany(mappedBy = "actor")
+    @ManyToMany(mappedBy = "actors")
     private Set<Movie> movies = new HashSet<>();
 
     public Actor() {
@@ -59,17 +58,12 @@ public class Actor {
         if (o == null || getClass() != o.getClass()) return false;
 
         Actor actor = (Actor) o;
-
-        if (!id.equals(actor.id)) return false;
-        if (!name.equals(actor.name)) return false;
-        return movies != null ? movies.equals(actor.movies) : actor.movies == null;
+        return !(actor.getId() == null || getId() == null) && Objects.equals(getId(), actor.getId());
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + name.hashCode();
-        return result;
+        return Objects.hashCode(getId());
     }
 
     @Override
