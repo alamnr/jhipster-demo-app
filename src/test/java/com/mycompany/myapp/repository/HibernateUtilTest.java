@@ -289,6 +289,87 @@ public class HibernateUtilTest {
         }
     }
 
+    @Test
+    public void testOwnerAndInverseSideAssociationUpdate(){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = session.getTransaction();
+        Guide guide_1  =  new Guide("32424","Mike",4000);
+        Guide guide_2  =  new Guide("13124","Molden",2000);
+        Student student_1 = new Student("123212","John Smith",guide_1);
+        Student student_2 = new Student("64757689","John Sina",guide_2);
+
+        guide_1.addStudent(student_1);
+        guide_2.addStudent(student_2);
+
+        List<Student> studentGetList;
+        List<Guide> guideGetList;
+
+
+        try{
+            transaction.begin();
+
+
+            // Test Cascade Persist Guide
+            session.persist(guide_1);
+            session.persist(guide_2);
+
+            transaction.commit();
+
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+
+        session = HibernateUtil.getSessionFactory().openSession();
+        transaction = session.getTransaction();
+
+        // Test Cascade Remove
+        try{
+            transaction.begin();
+
+            studentGetList = session.createQuery("from Student").list();
+            guide_1  = (Guide)session.createQuery("from Guide").list().get(0);
+
+            guide_1.setSalary(10000);
+            guide_1.addStudent(studentGetList.get(1));
+
+
+
+            System.out.println(studentGetList);
+            //System.out.println(guideGetList);
+
+
+
+            transaction.commit();
+
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+
+        System.out.println(guide_1);
+        Assertions.assertThat(studentGetList.size()).isEqualTo(2);
+
+        Assertions.assertThat(guide_1.getSalary()).isEqualTo(10000);
+        Assertions.assertThat(studentGetList.get(1).getGuide().getId()).isEqualTo(guide_1.getId());
+    }
+
     @After
     public void cleanUp(){
         Session session = HibernateUtil.getSessionFactory().openSession();

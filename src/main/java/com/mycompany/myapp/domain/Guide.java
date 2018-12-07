@@ -32,6 +32,7 @@ public class Guide {
 
     public void addStudent(Student student){
         this.students.add(student);
+        student.setGuide(this);
     }
 
     public Iterator<Student> getStudentIterator(){
