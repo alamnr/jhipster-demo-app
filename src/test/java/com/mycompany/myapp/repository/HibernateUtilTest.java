@@ -370,6 +370,61 @@ public class HibernateUtilTest {
         Assertions.assertThat(studentGetList.get(1).getGuide().getId()).isEqualTo(guide_1.getId());
     }
 
+    @Test
+    public void testOneToOneWithCascade(){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = session.getTransaction();
+        Passport passport;
+        Customer customer;
+        List<Passport> passportList;
+        List<Customer> customerList;
+        try{
+            transaction.begin();
+            passport = new Passport("Pass-12234455");
+            customer = new Customer("Kasem");
+            customer.setPassport(passport);
+
+            session.persist(customer);
+
+            transaction.commit();
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+        session = HibernateUtil.getSessionFactory().openSession();
+        transaction  = session.getTransaction();
+        try{
+            transaction.begin();
+            passportList = session.createQuery("from Passport").list();
+            customerList = session.createQuery("from Customer").list();
+
+            transaction.commit();
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(session!=null){
+                session.close();
+            }
+        }
+        /*System.out.println(passportList);
+        System.out.println(customerList);*/
+        Assertions.assertThat(passportList.size()).isEqualTo(1);
+        Assertions.assertThat(customerList.size()).isEqualTo(1);
+    }
+
     @After
     public void cleanUp(){
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -378,6 +433,9 @@ public class HibernateUtilTest {
 
         List<Student> studentGetList;
         List<Guide> guideGetList;
+
+        List<Customer> customerList;
+        List<Passport> passportList;
 
 
         // Test Cascade Remove
@@ -397,8 +455,14 @@ public class HibernateUtilTest {
             Query<Guide> q_ = session.createQuery(query_);
             guideGetList = q_.getResultList();
 
-            System.out.println(studentGetList);
+            passportList = session.createQuery("from Passport").list();
+            customerList = session.createQuery("from Customer").list();
+
+/*            System.out.println(studentGetList);
             System.out.println(guideGetList);
+
+            System.out.println(passportList);
+            System.out.println(customerList);*/
 
             for (Student student: studentGetList) {
                 session.delete(student);
@@ -406,6 +470,15 @@ public class HibernateUtilTest {
 
             for (Guide guide: guideGetList) {
                 session.delete(guide);
+            }
+
+            for(Customer customer: customerList){
+                session.delete(customer);
+            }
+
+
+            for(Passport passport: passportList){
+                session.delete(passport);
             }
 
             transaction.commit();
@@ -423,4 +496,6 @@ public class HibernateUtilTest {
             }
         }
     }
+
+
 }

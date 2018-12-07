@@ -9,7 +9,7 @@ public class Passport {
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "passport_number")
     private String passportNumber;
 
     @OneToOne(mappedBy = "passport")
@@ -18,9 +18,9 @@ public class Passport {
     public Passport() {
     }
 
-    public Passport(String passportNumber, Customer customer) {
+    public Passport(String passportNumber) {
         this.passportNumber = passportNumber;
-        this.customer = customer;
+
     }
 
     public Long getId() {
@@ -45,5 +45,14 @@ public class Passport {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
+    }
+
+    @Override
+    public String toString() {
+        return "Passport{" +
+            "id=" + id +
+            ", passportNumber='" + passportNumber + '\'' +
+            ", customer=" + customer +
+            '}';
     }
 }

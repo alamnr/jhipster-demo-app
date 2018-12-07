@@ -19,6 +19,8 @@
         <mapping class="com.mycompany.myapp.domain.Person" />
         <mapping class="com.mycompany.myapp.domain.Guide" />
         <mapping class="com.mycompany.myapp.domain.Student" />
+        <mapping class="com.mycompany.myapp.domain.Customer" />
+        <mapping class="com.mycompany.myapp.domain.Passport" />
 
     </session-factory>
 </hibernate-configuration>

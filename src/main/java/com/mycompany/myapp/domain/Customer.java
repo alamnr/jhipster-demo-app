@@ -13,16 +13,16 @@ public class Customer {
     @Column(nullable = false)
     private String name;
 
-    @OneToOne()
-    @JoinColumn(name = "passport_id")
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "passport_id", unique = true)
     private Passport passport;
 
     public Customer() {
     }
 
-    public Customer(String name, Passport passport) {
+    public Customer(String name) {
         this.name = name;
-        this.passport = passport;
+
     }
 
     public Long getId() {
