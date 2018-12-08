@@ -2,6 +2,7 @@ package com.mycompany.myapp.repository;
 
 import com.mycompany.myapp.domain.*;
 import com.mycompany.myapp.repository.util.HibernateUtil;
+import com.mycompany.myapp.repository.util.JpaEntityManagerUtil;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -9,6 +10,10 @@ import org.hibernate.query.Query;
 import org.junit.After;
 import org.junit.Test;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -470,6 +475,8 @@ public class HibernateUtilTest {
             movieList = session.createQuery("from Movie").list();
             actorList = session.createQuery("from Actor").list();
 
+            actorList.get(1).addMovies(movieList.get(1));
+
             transaction.commit();
         }
         catch(Exception ex){
@@ -483,10 +490,60 @@ public class HibernateUtilTest {
                 session.close();
             }
         }
-        /*System.out.println(passportList);
-        System.out.println(customerList);*/
+        /*System.out.println(movieList);
+        System.out.println(actorList);*/
         Assertions.assertThat(movieList.size()).isEqualTo(2);
         Assertions.assertThat(actorList.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void  testJpaEntityManagerFactory() throws  Exception{
+        // copy and paste  persistent.xml in to target/classes/META-INF/
+        EntityManager entityManager = JpaEntityManagerUtil.getEntityManagerFactory().createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        try{
+            transaction.begin();
+
+            Message msg  = new Message("Hello World with Hibernate as JPA Provider");
+            entityManager.persist(msg);
+
+            transaction.commit();
+        }
+        catch (Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(entityManager!=null){
+                entityManager.close();
+            }
+        }
+        List<Message> msgFetchList = null;
+        entityManager = JpaEntityManagerUtil.getEntityManagerFactory().createEntityManager();
+        transaction = entityManager.getTransaction();
+        try{
+            transaction.begin();
+
+            msgFetchList   =  entityManager.createQuery("select msg from Message msg", Message.class).getResultList();
+
+            transaction.commit();
+        }
+        catch (Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(entityManager!=null){
+                entityManager.close();
+            }
+        }
+        System.out.println(msgFetchList.get(0));
+        Assertions.assertThat(msgFetchList.size()).isGreaterThan(0);
+
     }
     @After
     public void cleanUp(){
@@ -499,6 +556,8 @@ public class HibernateUtilTest {
 
         List<Customer> customerList;
         List<Passport> passportList;
+
+
 
 
         // Test Cascade Remove
@@ -524,12 +583,19 @@ public class HibernateUtilTest {
             List<Movie> movieList = session.createQuery("from Movie").list();
             List<Actor> actorList = session.createQuery("from Actor").list();
 
+            List<Message> messageList = session.createQuery("from Message").list();
+
 
 /*            System.out.println(studentGetList);
             System.out.println(guideGetList);
 
             System.out.println(passportList);
             System.out.println(customerList);*/
+
+
+            for (Message msg: messageList) {
+                session.delete(msg);
+            }
 
             for (Student student: studentGetList) {
                 session.delete(student);
