@@ -1,12 +1,16 @@
 package com.mycompany.myapp.domain;
 
 
+import org.hibernate.annotations.BatchSize;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 @Entity
+// to understand batch size pls see video - https://www.youtube.com/watch?v=vTyvBKLDNv4&index=30&list=PLgzDdh90-m_TKIz4JNuqh3QarIdKiTS3q
+@BatchSize(size = 3)
 public class Guide {
 
     @Id

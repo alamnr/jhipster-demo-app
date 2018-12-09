@@ -14,8 +14,9 @@ public class Student {
     private String enrollmentId;
 
     private String name;
-
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    // Test Lazy Fetching
+    //@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.Lazy)
+    @ManyToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "guide_id")
     private Guide guide;
 
