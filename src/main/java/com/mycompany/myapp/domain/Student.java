@@ -21,10 +21,9 @@ public class Student {
 
     public Student(){}
 
-    public Student(String enrollmentId, String name, Guide guide) {
+    public Student(String enrollmentId, String name) {
         this.enrollmentId = enrollmentId;
         this.name = name;
-        this.guide = guide;
     }
 
     public Long getId() {

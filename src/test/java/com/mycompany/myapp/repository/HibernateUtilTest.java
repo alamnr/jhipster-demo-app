@@ -91,7 +91,8 @@ public class HibernateUtilTest {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = session.getTransaction();
         Guide guide  =  new Guide("32424","Mike",4000);
-        Student student = new Student("123212","John Smith",guide);
+        Student student = new Student("123212","John Smith");
+        student.setGuide(guide);
         Student studentGet;
         Guide guideGet;
 
@@ -219,8 +220,10 @@ public class HibernateUtilTest {
         Transaction transaction = session.getTransaction();
         Guide guide  =  new Guide("32424","Mike",4000);
         Guide guide_2  =  new Guide("13124","Molden",2000);
-        Student student = new Student("123212","John Smith",guide);
-        Student student_2 = new Student("64757689","John Sina",guide_2);
+        Student student = new Student("123212","John Smith");
+        Student student_2 = new Student("64757689","John Sina");
+        student.setGuide(guide);
+        student_2.setGuide(guide_2);
 
         guide.addStudent(student);
         guide_2.addStudent(student_2);
@@ -300,8 +303,10 @@ public class HibernateUtilTest {
         Transaction transaction = session.getTransaction();
         Guide guide_1  =  new Guide("32424","Mike",4000);
         Guide guide_2  =  new Guide("13124","Molden",2000);
-        Student student_1 = new Student("123212","John Smith",guide_1);
-        Student student_2 = new Student("64757689","John Sina",guide_2);
+        Student student_1 = new Student("123212","John Smith");
+        Student student_2 = new Student("64757689","John Sina");
+        student_1.setGuide(guide_1);
+        student_2.setGuide(guide_2);
 
         guide_1.addStudent(student_1);
         guide_2.addStudent(student_2);
@@ -496,55 +501,7 @@ public class HibernateUtilTest {
         Assertions.assertThat(actorList.size()).isEqualTo(2);
     }
 
-    @Test
-    public void  testJpaEntityManagerFactory() throws  Exception{
-        // copy and paste  persistent.xml in to target/classes/META-INF/
-        EntityManager entityManager = JpaEntityManagerUtil.getEntityManagerFactory().createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
-        try{
-            transaction.begin();
 
-            Message msg  = new Message("Hello World with Hibernate as JPA Provider");
-            entityManager.persist(msg);
-
-            transaction.commit();
-        }
-        catch (Exception ex){
-            if(transaction!=null){
-                transaction.rollback();
-            }
-            throw ex;
-        }
-        finally {
-            if(entityManager!=null){
-                entityManager.close();
-            }
-        }
-        List<Message> msgFetchList = null;
-        entityManager = JpaEntityManagerUtil.getEntityManagerFactory().createEntityManager();
-        transaction = entityManager.getTransaction();
-        try{
-            transaction.begin();
-
-            msgFetchList   =  entityManager.createQuery("select msg from Message msg", Message.class).getResultList();
-
-            transaction.commit();
-        }
-        catch (Exception ex){
-            if(transaction!=null){
-                transaction.rollback();
-            }
-            throw ex;
-        }
-        finally {
-            if(entityManager!=null){
-                entityManager.close();
-            }
-        }
-        System.out.println(msgFetchList.get(0));
-        Assertions.assertThat(msgFetchList.size()).isGreaterThan(0);
-
-    }
     @After
     public void cleanUp(){
         Session session = HibernateUtil.getSessionFactory().openSession();
