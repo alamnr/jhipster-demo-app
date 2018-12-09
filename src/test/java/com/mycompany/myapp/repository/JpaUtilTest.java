@@ -8,6 +8,7 @@ import com.mycompany.myapp.domain.*;
 import com.mycompany.myapp.repository.util.HibernateUtil;
 import com.mycompany.myapp.repository.util.JpaEntityManagerUtil;
 import org.assertj.core.api.Assertions;
+import org.hibernate.LazyInitializationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +16,8 @@ import org.junit.Test;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class JpaUtilTest {
@@ -283,6 +286,76 @@ public class JpaUtilTest {
             }
         }
     }
+
+    @Test
+    public void testLazyFetching(){
+
+        EntityManager entityManager = JpaEntityManagerUtil.getEntityManagerFactory().createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        Guide guide = null;
+
+        try {
+            transaction.begin();
+            guide = entityManager.find(Guide.class,3L);
+            System.out.println(guide);
+            Iterator<Student> iterator =  guide.getStudentIterator();
+            List<Student> studentList = new ArrayList<>();
+            while (iterator.hasNext()){
+                studentList.add(iterator.next());
+            }
+            System.out.println(studentList);
+            transaction.commit();
+            Assertions.assertThat(studentList.size()).isNotEqualTo(0);
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(entityManager!=null){
+                entityManager.close();
+            }
+        }
+    }
+
+
+
+    @Test(expected = LazyInitializationException.class)
+    public void testLazyFetchingException(){
+
+        EntityManager entityManager = JpaEntityManagerUtil.getEntityManagerFactory().createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        Guide guide = null;
+        Iterator<Student> iterator;
+        // Test Cascade Remove
+        try {
+            transaction.begin();
+            guide = entityManager.find(Guide.class,3L);
+            System.out.println(guide);
+            transaction.commit();
+        }
+        catch(Exception ex){
+            if(transaction!=null){
+                transaction.rollback();
+            }
+            throw ex;
+        }
+        finally {
+            if(entityManager!=null){
+                entityManager.close();
+            }
+        }
+
+        // out of the scope of em , lazy fetching will throw exception named LazyInitializationException
+        iterator = guide.getStudentIterator();
+        iterator.hasNext();
+        /*org.junit.jupiter.api.Assertions.assertThrows(LazyInitializationException.class,()->{
+            iterator.hasNext();
+        });*/
+    }
+
     //@After
     @Test
     public void cleanUp(){
